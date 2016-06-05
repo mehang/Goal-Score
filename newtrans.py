@@ -23,7 +23,8 @@ class GoalWindow:
            self.win.modify_bg(gtk.STATE_NORMAL, self.color)
            self.win.connect("destroy",gtk.main_quit)
            self.win.set_opacity(self.opacity)
-#           self.vbox = gtk.HBox(homogeneous = True)#homogeneous give all child equal space allocations
+           self.vbox = gtk.VBox(homogeneous = True)#homogeneous give all child equal space allocations
+           self.win.add(self.vbox) 
 
 
         def add_icon_image(self,hbox,country):
@@ -93,6 +94,34 @@ class GoalWindow:
             vcountrybox.pack_start(countrytext,False,False,0)
             return vcountrybox
 
+#button.set_tooltip_text("jalksjfl")
+
+        def leagueselectionmenu(self):
+            menu = gtk.combo_box_new_text()
+            menu.set_size_request(width = 200,height = 50)
+            self.win.add(menu)
+            menu.append_text("Select a league:")
+            menu.append_text("UEFA Euro")
+            menu.append_text("FIFA World Cup")
+            menu.append_text("COPA America")
+            menu.append_text("English Premier League")
+            menu.append_text("La Liga")
+            menu.append_text("Bundesliga")
+            menu.append_text("Serie A")
+            menu.append_text("Ligue 1")
+            menu.connect("changed",self.league)
+            menu.set_active(0)  #tells which is to be shown first
+            return menu
+
+        def league(self,menu): 
+            leaguename = menu.get_model()
+            index = menu.get_active()
+            if index:
+                print "league selected:", leaguename[index][0] 
+            return
+
+
+
         def vertical_box(self,box):
             self.vbox.pack_start(box,False)
             self.vbox.show()
@@ -121,11 +150,9 @@ class GoalWindow:
 
 
         def main(self):#gtk.separator 
-            self.vbox = gtk.VBox()
-            self.vbox.show()
             self.win.add(self.vbox)
+            self.vertical_box(self.leagueselectionmenu())
             self.vertical_box(self.horizontal_gameteam_box("Spain","Turkey"))
-            self.vbox.show()
             self.dimness()
             self.win.set_app_paintable(True)
             self.win.show_all()
