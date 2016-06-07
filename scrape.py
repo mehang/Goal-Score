@@ -12,8 +12,8 @@ DAYAFTER =  str(today + day + day)
 base_url = "http://www.livescore.com/soccer/"
 home_url = "http://www.livescore.com"
 
-dates = [YEST, TODAY, TOMO, DAYAFTER]
-    
+# dates = [YEST, TODAY, TOMO, DAYAFTER]
+dates = [TOMO]    
 class Scrape:
     # search for this team
     def __init__(self, search, urldate):
@@ -26,7 +26,7 @@ class Scrape:
         self.date = urldate
 
     def GetHtml(self, url, readFrom = 1):
-        if not readFrom:
+        if False: #not readFrom:
             f = open('/home/luffy/python/practice/'+self.date+'.txt','w+')
             html = f.read()
             f.close()     
@@ -38,12 +38,12 @@ class Scrape:
                 print "Check your Internet."
                 return None
             html = response.content
-        
+            '''        
             with open('/home/luffy/python/practice/'+self.date+'.txt','w+') as f:
                 #f.seek(0)
                 for line in html:
                     f.write(line)
-                    
+            '''                    
         return html
 
     def GetSoup(self, html):
@@ -89,7 +89,7 @@ class Scrape:
 
     def __str__(self):
         return self.date+"\n"+self.time+"---"+ self.homeTeam+" " +self.score+" " + self.awayTeam +" " + self.gameUrl+"\n"
-
+'''
 if __name__ == "__main__":
     searchFor = ["Vanuatu"]
         
@@ -101,8 +101,8 @@ if __name__ == "__main__":
             html = obj.GetHtml(url)
             soup = obj.GetSoup(html)
             if soup:
-                attrs= obj.GetAttrs(soup)
-            else:
-                attrs = None
+                obj.GetAttrs(soup)
+                
             print obj
                         
+'''

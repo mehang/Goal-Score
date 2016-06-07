@@ -45,7 +45,7 @@ class GoalWindow:
                     sys.exit(1)
 
 #contains box for team flag, name and score
-        def horizontal_gameteam_box(self, teamA, teamB, teamAscore = "-",teamBscore = "-", decider = "FT"):
+        def horizontal_gameteam_box(self, teamA, teamB, teamAscore = "?",teamBscore = "?", decider = "?"):
             hbox = gtk.HBox()
             hbox.show() 
             self.win.add(hbox)
@@ -149,10 +149,25 @@ class GoalWindow:
             errorwin.destroy()
 
 
-        def main(self):#gtk.separator 
+        def main(self, searchFor):#gtk.separator 
             self.win.add(self.vbox)
             self.vertical_box(self.leagueselectionmenu())
-            self.vertical_box(self.horizontal_gameteam_box("Spain","Turkey"))
+            # scraping
+            for searchTeam in searchFor:
+                for each in scrape.dates:
+                    obj = scrape.Scrape(searchTeam, each)
+
+                    url = scrape.base_url + each
+                    html = obj.GetHtml(url)
+                    soup = obj.GetSoup(html)
+                    if soup:
+                        obj.GetAttrs(soup)
+                        print obj
+                    else:
+                        print obj
+            # return obj
+
+            self.vertical_box(self.horizontal_gameteam_box(teamA = obj.homeTeam, teamB = obj.awayTeam, teamAscore = obj.score.split("-")[0],teamBscore = obj.score.split("-")[1], decider = obj.time))
             self.dimness()
             self.win.set_app_paintable(True)
             self.win.show_all()
@@ -161,8 +176,11 @@ class GoalWindow:
             return 0
 
 if __name__ == "__main__":
+
     window = GoalWindow()
     signal.signal(signal.SIGINT, signal.SIG_DFL)#keyboard ctrl+c interrupt
-    window.main() 
+    # send any one team as argument
+    teams = ["USA"]
+    window.main(teams)
 
 
