@@ -9,6 +9,7 @@ import sys
 import time
 import threading
 import scrape
+import os
 
 class GoalWindow:
         def __init__(self):
@@ -31,18 +32,21 @@ class GoalWindow:
             try:
                  #  image = gtk.Image() 
                  #  image.set_from_file("flag/spain.png");
-                   # a button to contain the image
-                   imagebutton = gtk.Button()
-                   imagebutton.set_size_request(width = 50,height = 50)
-                   pixbuf = gtk.gdk.pixbuf_new_from_file("flag/italy.png")
-                   pixbuf = pixbuf.scale_simple(50,50,gtk.gdk.INTERP_BILINEAR)
-                   image = gtk.image_new_from_pixbuf(pixbuf)
-                   imagebutton.add(image)
-                   hbox.pack_start(imagebutton,False,False,0)
+                 # a button to contain the image
+                 imagebutton = gtk.Button()
+                 imagebutton.set_size_request(width = 50,height = 50)
+                 if os.path.isfile("flag/uefa euro/"+country+".png"):
+                     pixbuf = gtk.gdk.pixbuf_new_from_file("flag/uefa euro/"+country+".png")
+                 else:
+                     pixbuf = gtk.gdk.pixbuf_new_from_file("flag/uefa euro/uefa.jpg")
+                 pixbuf = pixbuf.scale_simple(50,50,gtk.gdk.INTERP_BILINEAR)
+                 image = gtk.image_new_from_pixbuf(pixbuf)
+                 imagebutton.add(image)
+                 hbox.pack_start(imagebutton,False,False,0)
 
             except Exception, e:
-                    print e.message
-                    sys.exit(1)
+                self.error_window(e.message,"Loading Error")
+                sys.exit(1)
 
 #contains box for team flag, name and score
         def horizontal_gameteam_box(self, teamA, teamB, teamAscore = "?",teamBscore = "?", decider = "?"):
@@ -164,7 +168,7 @@ class GoalWindow:
 if __name__ == "__main__":
     window = GoalWindow()
     signal.signal(signal.SIGINT, signal.SIG_DFL)#keyboard ctrl+c interrupt
-    teams = ["Colombia"]
+    teams = ["Spain"]
     window.main(teams) 
 
 
