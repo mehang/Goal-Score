@@ -12,14 +12,16 @@ DAYAFTER =  str(today + day + day)
 base_url = "http://www.livescore.com/soccer/"
 home_url = "http://www.livescore.com"
 
-# dates = [YEST, TODAY, TOMO, DAYAFTER]
-dates = [TOMO]    
+dates = [YEST, TODAY, TOMO, DAYAFTER]
+
 class Scrape:
     # search for this team
     def __init__(self, search, urldate):
         self.search = search
         self.homeTeam = ""
         self.awayTeam = ""
+        self.homeScore = "?"
+        self.awayScore = "?"
         self.score = ""
         self.time = ""
         self.gameUrl = ""
@@ -85,14 +87,15 @@ class Scrape:
             self.score = str(sco.a.string)
             gameUrlPart = sco.a['href']
             self.gameUrl = str(home_url + gameUrlPart)
+        self.homeScore = self.score.split("-")[0]
+        self.awayScore = self.score.split("-")[1]
+        
         #print newSoup.prettify()
 
     def __str__(self):
-        return self.date+"\n"+self.time+"---"+ self.homeTeam+" " +self.score+" " + self.awayTeam +" " + self.gameUrl+"\n"
-'''
-if __name__ == "__main__":
-    searchFor = ["Vanuatu"]
-        
+        return self.date+"\n"+self.time+"---"+ self.homeTeam+" " +self.homeScore+"-"+self.awayScore+" " + self.awayTeam +" " + self.gameUrl+"\n"
+
+def main(searchFor):
     for searchTeam in searchFor:
         for each in dates:
             obj = Scrape(searchTeam, each)
@@ -102,7 +105,9 @@ if __name__ == "__main__":
             soup = obj.GetSoup(html)
             if soup:
                 obj.GetAttrs(soup)
-                
-            print obj
-                        
-'''
+                flag = 1
+                break
+		if flag : break
+    print obj
+    return obj
+           

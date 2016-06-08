@@ -9,7 +9,6 @@ import sys
 import time
 import threading
 import scrape
-import os
 
 class GoalWindow:
         def __init__(self):
@@ -35,18 +34,15 @@ class GoalWindow:
                    # a button to contain the image
                    imagebutton = gtk.Button()
                    imagebutton.set_size_request(width = 50,height = 50)
-                   if os.path.isfile("flag/"+country+".png"):
-                       pixbuf = gtk.gdk.pixbuf_new_from_file("flag/uefa euro/"+country+".png")
-                   else:
-                       pixbuf = gtk.gdk.pixbuf_new_from_file("flag/uefa euro/uefa.jpg")
+                   pixbuf = gtk.gdk.pixbuf_new_from_file("flag/italy.png")
                    pixbuf = pixbuf.scale_simple(50,50,gtk.gdk.INTERP_BILINEAR)
                    image = gtk.image_new_from_pixbuf(pixbuf)
                    imagebutton.add(image)
                    hbox.pack_start(imagebutton,False,False,0)
 
             except Exception, e:
-                self.error_window(e.message,"Loading Error")
-                sys.exit(1)
+                    print e.message
+                    sys.exit(1)
 
 #contains box for team flag, name and score
         def horizontal_gameteam_box(self, teamA, teamB, teamAscore = "?",teamBscore = "?", decider = "?"):
@@ -124,8 +120,6 @@ class GoalWindow:
                 print "league selected:", leaguename[index][0] 
             return
 
-
-
         def vertical_box(self,box):
             self.vbox.pack_start(box,False)
             self.vbox.show()
@@ -156,22 +150,10 @@ class GoalWindow:
         def main(self, searchFor):#gtk.separator 
             self.win.add(self.vbox)
             self.vertical_box(self.leagueselectionmenu())
-            # scraping
-            for searchTeam in searchFor:
-                for each in scrape.dates:
-                    obj = scrape.Scrape(searchTeam, each)
 
-                    url = scrape.base_url + each
-                    html = obj.GetHtml(url)
-                    soup = obj.GetSoup(html)
-                    if soup:
-                        obj.GetAttrs(soup)
-                        print obj
-                    else:
-                        print obj
-            # return obj
-
-            self.vertical_box(self.horizontal_gameteam_box(teamA = obj.homeTeam, teamB = obj.awayTeam, teamAscore = obj.score.split("-")[0],teamBscore = obj.score.split("-")[1], decider = obj.time))
+            obj = scrape.main(searchFor)
+            
+            self.vertical_box(self.horizontal_gameteam_box(teamA = obj.homeTeam, teamB = obj.awayTeam, teamAscore = obj.homeScore,teamBscore = obj.awayScore, decider = obj.time))
             self.dimness()
             self.win.set_app_paintable(True)
             self.win.show_all()
@@ -180,11 +162,9 @@ class GoalWindow:
             return 0
 
 if __name__ == "__main__":
-
     window = GoalWindow()
     signal.signal(signal.SIGINT, signal.SIG_DFL)#keyboard ctrl+c interrupt
-    # send any one team as argument
-    teams = ["USA"]
-    window.main(teams)
+    teams = ["Colombia"]
+    window.main(teams) 
 
 
