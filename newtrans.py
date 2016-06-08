@@ -35,7 +35,7 @@ class GoalWindow:
                    # a button to contain the image
                    imagebutton = gtk.Button()
                    imagebutton.set_size_request(width = 50,height = 50)
-                   if os.path.exists("flag/"+country+".png"):
+                   if os.path.isfile("flag/"+country+".png"):
                        pixbuf = gtk.gdk.pixbuf_new_from_file("flag/uefa euro/"+country+".png")
                    else:
                        pixbuf = gtk.gdk.pixbuf_new_from_file("flag/uefa euro/uefa.jpg")
