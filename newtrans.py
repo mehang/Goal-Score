@@ -17,15 +17,26 @@ class GoalWindow:
            self.opacity = 1 
            self.win.set_title("Goal Score!!!!!")
            self.win.set_icon_from_file("icon.jpg");
-#           self.win.set_size_request(300,130)
+           self.win.set_size_request(300,200)
            self.win.move(500,500)
            #self.win.set_gravity(gtk.gdk.GRAVITY_SOUTH_WEST)
            self.color = gtk.gdk.color_parse("#032941")
            self.win.modify_bg(gtk.STATE_NORMAL, self.color)
            self.win.connect("destroy",gtk.main_quit)
            self.win.set_opacity(self.opacity)
-           self.vbox = gtk.VBox(homogeneous = True)#homogeneous give all child equal space allocations
-           self.win.add(self.vbox) 
+           self.vbox = gtk.VBox(homogeneous = False)#homogeneous give all child equal space allocations
+
+           self.separator = gtk.VSeparator()
+
+           self.maincontainer = gtk.VBox(homogeneous=False)
+
+           self.scrolledwindow = gtk.ScrolledWindow()
+           self.scrolledwindow.set_border_width(1)
+           self.scrolledwindow.set_policy(gtk.POLICY_AUTOMATIC,gtk.POLICY_ALWAYS)
+           self.scrolledwindow.add_with_viewport(self.vbox)
+           self.win.add(self.maincontainer)
+           self.maincontainer.pack_start(self.leagueselectionmenu(),False,True,0)
+           self.maincontainer.pack_start(self.scrolledwindow,True,True,0)
 
 
         def add_icon_image(self,hbox,country):
@@ -34,7 +45,7 @@ class GoalWindow:
                  #  image.set_from_file("flag/spain.png");
                  # a button to contain the image
                  imagebutton = gtk.Button()
-                 imagebutton.set_size_request(width = 50,height = 50)
+                 imagebutton.set_size_request(width = 100,height = 50)
                  if os.path.isfile("flag/uefa euro/"+country+".png"):
                      pixbuf = gtk.gdk.pixbuf_new_from_file("flag/uefa euro/"+country+".png")
                  else:
@@ -52,7 +63,6 @@ class GoalWindow:
         def horizontal_gameteam_box(self, teamA, teamB, teamAscore = "?",teamBscore = "?", decider = "?"):
             hbox = gtk.HBox()
             hbox.show() 
-            self.win.add(hbox)
             hbox.pack_start(self.team_container(teamA),False,False,0)
             hbox.pack_start(self.score_box(teamAscore,teamBscore,decider),False,False,0)
             hbox.pack_end(self.team_container(teamB),False,False,0)
@@ -61,7 +71,6 @@ class GoalWindow:
         def score_box(self, teamAscore, teamBscore,gamedecider):
             hbox = gtk.HBox()
             hbox.show()
-            self.win.add(hbox)
             scorebuttonA = gtk.Button()
             scorebuttonA.set_size_request(width = 50,height = 50)
             scorebuttonA.set_label(str(teamAscore))
@@ -76,7 +85,6 @@ class GoalWindow:
             hbox.pack_end(scorebuttonB,False,False,0)
             vbox = gtk.VBox()
             vbox.show()
-            self.win.add(vbox)
             vbox.pack_start(hbox,False,False,0)
             scorebase = gtk.Label()
             scorebase.modify_fg(gtk.STATE_NORMAL,gtk.gdk.Color(65535,65535,65535) )
@@ -89,7 +97,6 @@ class GoalWindow:
         def team_container(self,countryname):
             vcountrybox = gtk.VBox()
             vcountrybox.show()
-            self.win.add(vcountrybox)
             self.add_icon_image(vcountrybox,countryname.lower().replace(" ",""))
             countrytext = gtk.Label()
             countrytext.modify_fg(gtk.STATE_NORMAL,gtk.gdk.Color(65535,65535,65535) )
@@ -102,8 +109,7 @@ class GoalWindow:
 
         def leagueselectionmenu(self):
             menu = gtk.combo_box_new_text()
-            menu.set_size_request(width = 200,height = 50)
-            self.win.add(menu)
+            menu.set_size_request(width = 200,height = 40)
             menu.append_text("Select a league:")
             menu.append_text("UEFA Euro")
             menu.append_text("FIFA World Cup")
@@ -126,7 +132,9 @@ class GoalWindow:
 
         def vertical_box(self,box):
             self.vbox.pack_start(box,False)
+            self.vbox.pack_start(self.separator,False,True,1)
             self.vbox.show()
+            self.scrolledwindow.add_with_viewport(self.vbox)
 
         def make_opaque(self,widget,event):
             self.opacity = 1
@@ -134,8 +142,8 @@ class GoalWindow:
 
         def make_transparent(self,widget,event):
             
-         #   if event.detail != gtk.gdk.NOTIFY_NONLINEAR_VIRTUAL and event.detail != gtk.gdk.NOTIFY_NONLINEAR :
-         #       return
+            if event.detail != gtk.gdk.NOTIFY_NONLINEAR_VIRTUAL and event.detail != gtk.gdk.NOTIFY_NONLINEAR :
+                return
             self.opacity = 0.5
             self.win.set_opacity(self.opacity)
 
@@ -151,13 +159,24 @@ class GoalWindow:
             errorwin.destroy()
 
 
-        def main(self, searchFor):#gtk.separator 
-            self.win.add(self.vbox)
-            self.vertical_box(self.leagueselectionmenu())
+        def main(self, searchFor): 
 
-            obj = scrape.main(searchFor)
-            
-            self.vertical_box(self.horizontal_gameteam_box(teamA = obj.homeTeam, teamB = obj.awayTeam, teamAscore = obj.homeScore,teamBscore = obj.awayScore, decider = obj.time))
+            self.vertical_box(self.horizontal_gameteam_box(teamA = "korea", teamB = "japan", teamAscore = "2",teamBscore = "3", decider = "FT"))
+            self.vertical_box(self.horizontal_gameteam_box(teamA = "korea", teamB = "japan", teamAscore = "2",teamBscore = "3", decider = "FT"))
+            self.vertical_box(self.horizontal_gameteam_box(teamA = "korea", teamB = "japan", teamAscore = "2",teamBscore = "3", decider = "FT"))
+            self.vertical_box(self.horizontal_gameteam_box(teamA = "korea", teamB = "japan", teamAscore = "2",teamBscore = "3", decider = "FT"))
+            self.vertical_box(self.horizontal_gameteam_box(teamA = "korea", teamB = "japan", teamAscore = "2",teamBscore = "3", decider = "FT"))
+            self.vertical_box(self.horizontal_gameteam_box(teamA = "korea", teamB = "japan", teamAscore = "2",teamBscore = "3", decider = "FT"))
+            self.vertical_box(self.horizontal_gameteam_box(teamA = "korea", teamB = "japan", teamAscore = "2",teamBscore = "3", decider = "FT"))
+            self.vertical_box(self.horizontal_gameteam_box(teamA = "korea", teamB = "japan", teamAscore = "2",teamBscore = "3", decider = "FT"))
+            self.vertical_box(self.horizontal_gameteam_box(teamA = "korea", teamB = "japan", teamAscore = "2",teamBscore = "3", decider = "FT"))
+            self.vertical_box(self.horizontal_gameteam_box(teamA = "korea", teamB = "japan", teamAscore = "2",teamBscore = "3", decider = "FT"))
+
+
+           # for i in searchFor:
+           #     obj = scrape.main(i)
+           #     self.vertical_box(self.horizontal_gameteam_box(teamA = obj.homeTeam, teamB = obj.awayTeam, teamAscore = obj.homeScore,teamBscore = obj.awayScore, decider = obj.time))
+           
             self.dimness()
             self.win.set_app_paintable(True)
             self.win.show_all()
@@ -168,7 +187,7 @@ class GoalWindow:
 if __name__ == "__main__":
     window = GoalWindow()
     signal.signal(signal.SIGINT, signal.SIG_DFL)#keyboard ctrl+c interrupt
-    teams = ["Spain"]
+    teams = ["Brazil","Ecuador","Haiti","Colombia","Peru"]
     window.main(teams) 
 
 
