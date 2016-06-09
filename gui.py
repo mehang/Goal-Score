@@ -10,20 +10,11 @@ import time
 import threading
 import scrape
 import os
+import gobject
 
 class GoalWindow:
         def __init__(self):
            self.win = gtk.Window(gtk.WINDOW_TOPLEVEL) 
-           self.opacity = 1 
-           self.win.set_title("Goal Score!!!!!")
-           self.win.set_icon_from_file("icon.jpg");
-           self.win.set_size_request(300,200)
-           self.win.move(500,500)
-           #self.win.set_gravity(gtk.gdk.GRAVITY_SOUTH_WEST)
-           self.color = gtk.gdk.color_parse("#032941")
-           self.win.modify_bg(gtk.STATE_NORMAL, self.color)
-           self.win.connect("destroy",gtk.main_quit)
-           self.win.set_opacity(self.opacity)
            self.vbox = gtk.VBox(homogeneous = False)#homogeneous give all child equal space allocations
 
            self.separator = gtk.VSeparator()
@@ -34,10 +25,95 @@ class GoalWindow:
            self.scrolledwindow.set_border_width(1)
            self.scrolledwindow.set_policy(gtk.POLICY_AUTOMATIC,gtk.POLICY_ALWAYS)
            self.scrolledwindow.add_with_viewport(self.vbox)
+
+           self.toolbar = gtk.Toolbar()
+           self.toolbar.set_style(gtk.TOOLBAR_ICONS)
+           self.addteam = gtk.ToolButton(gtk.STOCK_PREFERENCES)
+           self.addteam.set_tooltip_text("Modify your favourite team list")
+           self.toolbar.insert(self.addteam,0)
+           self.addteam.connect("clicked",self.modify_fav_team)
+
            self.win.add(self.maincontainer)
+           self.maincontainer.pack_start(self.toolbar,False,True,0)
            self.maincontainer.pack_start(self.leagueselectionmenu(),False,True,0)
            self.maincontainer.pack_start(self.scrolledwindow,True,True,0)
 
+           gtk.timeout_add(1000,self.win.queue_draw)
+
+           self.myteamlist = ["Ecuador"]#list of favourite team to display
+           self.teamname = ""  #team name in entry box
+
+           self.euroteam = ["albania","austria","begium","croatia",
+                            "czech republic","england","france","germany",
+                            "hungary","iceland","italy","northern ireland",
+                            "poland","portugal","republic of ireland","romania",
+                            "russia","slovakia","spain","sweden",
+                            "switzerland","turkey","ukraine","wales"]
+
+           self.teamstodisplay = []
+
+           self.counter = 1
+
+        def jpt(self):
+            print "jpt"
+
+        def initialize_window(self):
+            self.opacity = 1 
+            self.win.set_title("Goal Score!!!!!")
+            self.win.set_icon_from_file("icon.jpg");
+            self.win.set_size_request(300,200)
+            self.win.move(500,500)
+            #self.win.set_gravity(gtk.gdk.GRAVITY_SOUTH_WEST)
+            self.color = gtk.gdk.color_parse("#032941")
+            self.win.modify_bg(gtk.STATE_NORMAL, self.color)
+            self.win.connect("destroy",gtk.main_quit)
+            self.win.set_opacity(self.opacity)
+
+        def modify_fav_team(self,widget):
+            settings = gtk.Dialog(title = "Settings")
+            entry = gtk.Entry()
+            entry.set_max_length(50)
+            #entry.set_text("Enter your team name")
+            entry.set_tooltip_text("Enter your teamname to add or remove from list")
+            entry.show()
+            settings.vbox.pack_start(entry)
+            addbutton = gtk.ToolButton(gtk.STOCK_ADD)
+            addbutton.set_tooltip_text("Add to the favourite team list")
+            addbutton.connect("clicked",self.add_team,entry)
+            addbutton.show()
+            deletebutton = gtk.ToolButton(gtk.STOCK_CLEAR)
+            deletebutton.set_tooltip_text("Delete from the favourite team list")
+            deletebutton.connect("clicked",self.remove_team,entry)
+            deletebutton.show()
+            buttoncontainer = gtk.HBox()
+            buttoncontainer.pack_start(addbutton,False,True,1)
+            buttoncontainer.pack_start(deletebutton,False,True,1)
+            buttoncontainer.show()
+            settings.vbox.pack_start(buttoncontainer)
+            settings.run()
+            settings.destroy()
+
+        def add_team(self,widget,entry):
+            self.teamname = entry.get_text()
+            if self.teamname:
+                if self.teamname == "Enter your team name":
+                    self.error_window("Please enter a team name to add","Team List Modification Error")
+                elif self.teamname in self.myteamlist:
+                    self.error_window("Team already added", "Team List Modification Error")
+                else:
+                    self.myteamlist.append(self.teamname)
+                    print self.myteamlist
+
+        def remove_team(self,widget,entry):
+            self.teamname = entry.get_text()
+            if self.teamname:
+                if self.teamname == "Enter your team name":
+                    self.error_window("Please enter a team name to remove","Team List Modification Error")
+                    if self.teamname in self.myteamlist:
+                        self.myteamlist.remove(self.teamname)
+                    else:
+                        self.error_window("No team in the list", "Team List Modification Error")
+                        print self.myteamlist
 
         def add_icon_image(self,hbox,country):
             try:
@@ -111,6 +187,7 @@ class GoalWindow:
             menu = gtk.combo_box_new_text()
             menu.set_size_request(width = 200,height = 40)
             menu.append_text("Select a league:")
+            menu.append_text("My Team")
             menu.append_text("UEFA Euro")
             menu.append_text("FIFA World Cup")
             menu.append_text("COPA America")
@@ -125,7 +202,13 @@ class GoalWindow:
 
         def league(self,menu): 
             leaguename = menu.get_model()
+            dictionary = {1 : self.myteamlist ,2 : self.euroteam}
             index = menu.get_active()
+            if not dictionary[index]:
+                self.error_window("Please add team name","Empty Team List")
+                return
+            self.teamstodisplay = dictionary[index][:]
+            print self.teamstodisplay
             if index:
                 print "league selected:", leaguename[index][0] 
             return
@@ -160,26 +243,20 @@ class GoalWindow:
 
 
         def main(self, searchFor): 
+            self.initialize_window()
 
-            self.vertical_box(self.horizontal_gameteam_box(teamA = "korea", teamB = "japan", teamAscore = "2",teamBscore = "3", decider = "FT"))
-            self.vertical_box(self.horizontal_gameteam_box(teamA = "korea", teamB = "japan", teamAscore = "2",teamBscore = "3", decider = "FT"))
-            self.vertical_box(self.horizontal_gameteam_box(teamA = "korea", teamB = "japan", teamAscore = "2",teamBscore = "3", decider = "FT"))
-            self.vertical_box(self.horizontal_gameteam_box(teamA = "korea", teamB = "japan", teamAscore = "2",teamBscore = "3", decider = "FT"))
-            self.vertical_box(self.horizontal_gameteam_box(teamA = "korea", teamB = "japan", teamAscore = "2",teamBscore = "3", decider = "FT"))
-            self.vertical_box(self.horizontal_gameteam_box(teamA = "korea", teamB = "japan", teamAscore = "2",teamBscore = "3", decider = "FT"))
-            self.vertical_box(self.horizontal_gameteam_box(teamA = "korea", teamB = "japan", teamAscore = "2",teamBscore = "3", decider = "FT"))
-            self.vertical_box(self.horizontal_gameteam_box(teamA = "korea", teamB = "japan", teamAscore = "2",teamBscore = "3", decider = "FT"))
-            self.vertical_box(self.horizontal_gameteam_box(teamA = "korea", teamB = "japan", teamAscore = "2",teamBscore = "3", decider = "FT"))
-            self.vertical_box(self.horizontal_gameteam_box(teamA = "korea", teamB = "japan", teamAscore = "2",teamBscore = "3", decider = "FT"))
+#            self.vertical_box(self.horizontal_gameteam_box(teamA = "korea", teamB = "japan", teamAscore = "2",teamBscore = "3", decider = "FT"))
 
 
-           # for i in searchFor:
-           #     obj = scrape.main(i)
-           #     self.vertical_box(self.horizontal_gameteam_box(teamA = obj.homeTeam, teamB = obj.awayTeam, teamAscore = obj.homeScore,teamBscore = obj.awayScore, decider = obj.time))
+            print self.counter
+            for i in searchFor:
+                obj = scrape.main(i)
+                self.vertical_box(self.horizontal_gameteam_box(teamA = obj.homeTeam, teamB = obj.awayTeam, teamAscore = obj.homeScore,teamBscore = obj.awayScore, decider = obj.time))
            
             self.dimness()
             self.win.set_app_paintable(True)
             self.win.show_all()
+            ++self.counter
 
             gtk.main()
             return 0
@@ -187,7 +264,7 @@ class GoalWindow:
 if __name__ == "__main__":
     window = GoalWindow()
     signal.signal(signal.SIGINT, signal.SIG_DFL)#keyboard ctrl+c interrupt
-    teams = ["Brazil","Ecuador","Haiti","Colombia","Peru"]
+    teams = ["Brazil","FC Inter"]
     window.main(teams) 
 
 
