@@ -51,8 +51,6 @@ class GoalWindow:
 
            self.counter = 1
 
-           gtk.timeout_add(60000,self.main)
-
 
         def initialize_window(self):
             self.opacity = 1 
@@ -106,6 +104,7 @@ class GoalWindow:
             settings.destroy()
 
         def add_team(self,widget,entry):
+            self.empty_box(self.maincontainer)
             self.teamname = entry.get_text()
             if self.teamname:
                 if self.teamname == "Enter your team name":
@@ -224,6 +223,10 @@ class GoalWindow:
                 print "league selected:", leaguename[index][0] 
             return
 
+        def empty_box(self,box):
+            box.forall(lambda widget:box.remove(widget))
+            box.show()
+
         def vertical_box(self,box):
             self.vbox.pack_start(box,False)
             self.vbox.pack_start(self.separator,False,True,1)
@@ -233,13 +236,18 @@ class GoalWindow:
         def make_opaque(self,widget,event):
             self.opacity = 1
             self.win.set_opacity(self.opacity)
+            
 
         def make_transparent(self,widget,event):
             
             if event.detail != gtk.gdk.NOTIFY_NONLINEAR_VIRTUAL and event.detail != gtk.gdk.NOTIFY_NONLINEAR :
                 return
             self.opacity = 0.5
+            gtk.timeout_add(5000,self.change_opacity)
+
+        def change_opacity(self):
             self.win.set_opacity(self.opacity)
+            print "opacity changed"+"."*5
 
         def dimness(self):
             self.win.connect("enter_notify_event",self.make_opaque)
@@ -260,15 +268,16 @@ class GoalWindow:
 
 
             print self.counter
-            for i in self.myteamlist:
-                obj = scrape.main(i)
-                self.vertical_box(self.horizontal_gameteam_box(teamA = obj.homeTeam, teamB = obj.awayTeam, teamAscore = obj.homeScore,teamBscore = obj.awayScore, decider = obj.time))
+#            for i in self.myteamlist:
+#                obj = scrape.main(i)
+#                self.vertical_box(self.horizontal_gameteam_box(teamA = obj.homeTeam, teamB = obj.awayTeam, teamAscore = obj.homeScore,teamBscore = obj.awayScore, decider = obj.time))
            
             self.dimness()
             self.win.set_app_paintable(True)
             self.win.show_all()
             self.counter=self.counter+1
             print self.counter
+            gtk.timeout_add(6000,self.main)
 
             gtk.main()
             return 0
