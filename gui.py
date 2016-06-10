@@ -10,7 +10,6 @@ import time
 import threading
 import scrape
 import os
-import gobject
 
 class GoalWindow:
         def __init__(self):
@@ -38,12 +37,10 @@ class GoalWindow:
            self.maincontainer.pack_start(self.leagueselectionmenu(),False,True,0)
            self.maincontainer.pack_start(self.scrolledwindow,True,True,0)
 
-           gtk.timeout_add(1000,self.win.queue_draw)
-
-           self.myteamlist = ["Ecuador"]#list of favourite team to display
+           self.myteamlist = [] #list of favourite team to display
            self.teamname = ""  #team name in entry box
 
-           self.euroteam = ["albania","austria","begium","croatia",
+           self.euroteam = ["Brazil","albania","austria","begium","croatia",
                             "czech republic","england","france","germany",
                             "hungary","iceland","italy","northern ireland",
                             "poland","portugal","republic of ireland","romania",
@@ -54,8 +51,8 @@ class GoalWindow:
 
            self.counter = 1
 
-        def jpt(self):
-            print "jpt"
+           gtk.timeout_add(60000,self.main)
+
 
         def initialize_window(self):
             self.opacity = 1 
@@ -66,8 +63,23 @@ class GoalWindow:
             #self.win.set_gravity(gtk.gdk.GRAVITY_SOUTH_WEST)
             self.color = gtk.gdk.color_parse("#032941")
             self.win.modify_bg(gtk.STATE_NORMAL, self.color)
-            self.win.connect("destroy",gtk.main_quit)
+            self.win.connect("destroy",self.close_window)
             self.win.set_opacity(self.opacity)
+            self.read_from_file()
+
+        def close_window(self,widget):#close the main window function
+            #with open("team list","wb")as f:
+            #    pickle.dump(self.myteamlist,f)#pickle writes in human unreadable form
+            with open("team list","w+") as f: #w+ creates file if it doesnot exist
+                for team in self.myteamlist:
+                    f.write(team + "\n")
+            gtk.main_quit()
+
+        def read_from_file(self):
+            #with open("team list","rb") as f:
+            #    self.myteamlist = pickle.load(f)
+            with open("team list","a+") as f:
+                self.myteamlist = [team.rstrip("\n") for team in f]
 
         def modify_fav_team(self,widget):
             settings = gtk.Dialog(title = "Settings")
@@ -181,8 +193,6 @@ class GoalWindow:
             vcountrybox.pack_start(countrytext,False,False,0)
             return vcountrybox
 
-#button.set_tooltip_text("jalksjfl")
-
         def leagueselectionmenu(self):
             menu = gtk.combo_box_new_text()
             menu.set_size_request(width = 200,height = 40)
@@ -202,7 +212,8 @@ class GoalWindow:
 
         def league(self,menu): 
             leaguename = menu.get_model()
-            dictionary = {1 : self.myteamlist ,2 : self.euroteam}
+            #print self.euroteam
+            dictionary = {1 : self.myteamlist[:],2 : self.euroteam[:]}
             index = menu.get_active()
             if not dictionary[index]:
                 self.error_window("Please add team name","Empty Team List")
@@ -242,21 +253,22 @@ class GoalWindow:
             errorwin.destroy()
 
 
-        def main(self, searchFor): 
+        def main(self, searchFor=["england"]): 
             self.initialize_window()
 
-#            self.vertical_box(self.horizontal_gameteam_box(teamA = "korea", teamB = "japan", teamAscore = "2",teamBscore = "3", decider = "FT"))
+            self.vertical_box(self.horizontal_gameteam_box(teamA = "korea", teamB = "japan", teamAscore = "2",teamBscore = "3", decider = "FT"))
 
 
             print self.counter
-            for i in searchFor:
+            for i in self.myteamlist:
                 obj = scrape.main(i)
                 self.vertical_box(self.horizontal_gameteam_box(teamA = obj.homeTeam, teamB = obj.awayTeam, teamAscore = obj.homeScore,teamBscore = obj.awayScore, decider = obj.time))
            
             self.dimness()
             self.win.set_app_paintable(True)
             self.win.show_all()
-            ++self.counter
+            self.counter=self.counter+1
+            print self.counter
 
             gtk.main()
             return 0
