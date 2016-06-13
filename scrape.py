@@ -1,6 +1,9 @@
+import threading
 import requests
 from bs4 import BeautifulSoup as bs
 from datetime import date, timedelta
+
+import fileThread
 
 today = date.today()
 day = timedelta(days = 1)
@@ -16,6 +19,7 @@ dates = [YEST, TODAY, TOMO, DAYAFTER]
 
 class Scrape:
     # search for this team
+    html = []
     def __init__(self, search, urldate):
         self.search = search
         self.homeTeam = ""
@@ -27,7 +31,8 @@ class Scrape:
         self.gameUrl = ""
         self.date = urldate
 
-    def GetHtml(self, url, readFrom = 1):
+    @staticmethod
+    def GetHtml(url, readFrom = 1):
         if False: #not readFrom:
             f = open('/home/luffy/python/practice/'+self.date+'.txt','w+')
             html = f.read()
@@ -57,7 +62,7 @@ class Scrape:
         index = 0
         # get the first matching team and break
         while index < len(team1):
-            if self.search in team1[index].string or self.search in team2[index].string:
+            if self.search.lower() in team1[index].string.lower() or self.search.lower() in team2[index].string.lower():
             # if self.search == team1[index].text[1:-1] or self.search in team2[index].text[1:-1]:
                 break
             index += 1
@@ -93,21 +98,35 @@ class Scrape:
         #print newSoup.prettify()
 
     def __str__(self):
-        return self.date+"\n"+self.time+"---"+ self.homeTeam+" " +self.homeScore+"-"+self.awayScore+" " + self.awayTeam +" " + self.gameUrl+"\n"
+        return self.date+';'+self.time+";"+ self.homeTeam+";" +self.homeScore+";"+self.awayScore+";" + self.awayTeam +";"+ self.gameUrl
 
-def main(searchFor):
+def main(searchFor, lock):
+    objects = []
+    for each in dates:
+        url = base_url + each
+        Scrape.html.append(Scrape.GetHtml(url))
+
     for searchTeam in searchFor:
+        flag = False
+        i = 0
         for each in dates:
             obj = Scrape(searchTeam, each)
             
-            url = base_url + each
-            html = obj.GetHtml(url)
-            soup = obj.GetSoup(html)
+            soup = obj.GetSoup(Scrape.html[i])
+            i += 1
             if soup:
                 obj.GetAttrs(soup)
-                flag = 1
+                flag = True
                 break
-		if flag : break
-    print obj
-    return obj
-           
+        if flag: objects.append(obj)
+
+    # print len(objects)," writable objects"
+    thread1 = threading.Thread(target = fileThread.FileHandle, args = ('w',lock,objects))
+    thread1.start()
+    # print "now returning to timeThread"
+    return
+
+# searchFor = ["mexico","uruguay"]
+# games = main(searchFor)
+# for game in games:
+#     print game
