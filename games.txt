@@ -1,3 +1,3 @@
-2016-06-10; FT ; Mexico ;2 ; 0; Jamaica ;http://www.livescore.com/soccer/copa-america/group-c/mexico-vs-jamaica/1-2156794/
-2016-06-09; FT ; Uruguay ;0 ; 1; Venezuela ;http://www.livescore.com/soccer/copa-america/group-c/uruguay-vs-venezuela/1-2156793/
-2016-06-10; 19:00 ; France ;? ; ?; Romania ;http://www.livescore.com/euro/match/?match=1-1695419
+2016-06-20; FT ; Russia ;0 ; 3; Wales ;http://www.livescore.com/euro/match/?match=1-1695431
+2016-06-21; 16:00 ; Ukraine ;? ; ?; Poland ;http://www.livescore.com/euro/match/?match=1-1695436
+2016-06-21; 19:00 ; Czech Republic ;? ; ?; Turkey ;http://www.livescore.com/euro/match/?match=1-1695443

@@ -17,7 +17,14 @@ import scrape
 
 
 class GoalWindow:
-    myteamlist = ["Belgium"]
+    myteamlist = ["russIA","uruguay","russia","poland","czech"]
+    euroteam = ["albania","austria","begium","croatia",
+                         "czech republic","england","france","germany",
+                         "hungary","iceland","italy","northern ireland",
+                         "poland","portugal","republic of ireland","romania",
+                         "russia","slovakia","spain","sweden",
+                         "switzerland","turkey","ukraine","wales"]
+
     def __init__(self):
         self.win = gtk.Window(gtk.WINDOW_TOPLEVEL) 
         self.vbox = gtk.VBox(homogeneous = False)#homogeneous give all child equal space allocations
@@ -45,13 +52,6 @@ class GoalWindow:
 
         self.myteamlist = [] #list of favourite team to display
         self.teamname = ""  #team name in entry box
-
-        self.euroteam = ["albania","austria","begium","croatia",
-                         "czech republic","england","france","germany",
-                         "hungary","iceland","italy","northern ireland",
-                         "poland","portugal","republic of ireland","romania",
-                         "russia","slovakia","spain","sweden",
-                         "switzerland","turkey","ukraine","wales"]
 
         self.teamstodisplay = []
 
@@ -228,12 +228,18 @@ class GoalWindow:
     def update_box(self):
         self.empty_box(self.vbox)
         #self.vertical_box(self.horizontal_gameteam_box(teamA = "korea", teamB = "japan", teamAscore = "2",teamBscore = "3", decider = "FT"))
+        
+        aThread = threading.Thread(target = scrape.main, args = (GoalWindow.myteamlist,))
+        aThread.daemon = True
+        aThread.start()
+
         with open("games.txt","r") as f:
             for matchfact in f:
                 fact = matchfact.split(";")
                 self.vertical_box( self.horizontal_gameteam_box( teamA = fact[2].strip(), teamB = fact[5].strip(), teamAscore = fact[3].strip(), teamBscore = fact[4].strip(), decider = fact[1].strip()))
                 self.vbox.show_all()
-        gtk.timeout_add(20000,self.update_box) #refresh time of 20 seconds
+        gtk.timeout_add(60000,self.update_box) #refresh time of 60 seconds
+
 
     def make_opaque(self,widget,event):
         self.opacity = 1
@@ -265,10 +271,10 @@ class GoalWindow:
 
         self.update_box() #refresh gui by reading from file
 
-        fileThread.FileHandle('r')
-        games = fileThread.details
-        for items in games: #swag maile update mai gareko chu yo kaam taile lekheko anusar file ma update mai mila
-            self.vertical_box(self.horizontal_gameteam_box(teamA = items[2], teamB = items[5], teamAscore = items[3],teamBscore = items[4], decider = items[1]))
+        # fileThread.FileHandle('r')
+        # games = fileThread.details
+        # for items in games: #swag maile update mai gareko chu yo kaam taile lekheko anusar file ma update mai mila
+        #     self.vertical_box(self.horizontal_gameteam_box(teamA = items[2], teamB = items[5], teamAscore = items[3],teamBscore = items[4], decider = items[1]))
 
         self.dimness()
         self.win.set_app_paintable(True)
@@ -277,35 +283,13 @@ class GoalWindow:
         gtk.main()
         return 0
 
-class timeThread(threading.Thread):
-    def __init__(self, teams, delay, lock):
-        threading.Thread.__init__(self)
-        self.teams = teams
-        self.delay = delay
-        self.lock = lock
-
-    def run(self):
-        scrape.main(self.teams, self.lock)
-        start = time.time()
-        # go on forever :: request after each delay
-        while True:
-            # wait for some time
-            print "CALL SCRAPE.MAIN() AGAIN."
-            scrape.main(self.teams, self.lock)
-            # start = time.time()
-            print time.ctime(start), " time after delay call to scrape."
-            time.sleep(self.delay)
-
 if __name__ == "__main__":
     window = GoalWindow()
     signal.signal(signal.SIGINT, signal.SIG_DFL)#keyboard ctrl+c interrupt
     # lock
-    lock = threading.Lock()
+    # lock = threading.Lock()
     teams = GoalWindow.myteamlist[:]
-
-    delay = 60 # secs to request the site
-    aThread = timeThread(teams, delay, lock)
-    aThread.start()
+    
     # scrape.main(teams, lock)
-    # No GUI, thread works fine... with GUI, thread wont run till GUI is closed.. GUI needs threading as well
+    time.sleep(5)
     window.main()

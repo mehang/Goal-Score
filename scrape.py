@@ -100,7 +100,22 @@ class Scrape:
     def __str__(self):
         return self.date+';'+self.time+";"+ self.homeTeam+";" +self.homeScore+";"+self.awayScore+";" + self.awayTeam +";"+ self.gameUrl
 
-def main(searchFor, lock):
+def FileWrite(objects):
+    f = open('games.txt', 'w+')
+    f.seek(0)
+    for obj in objects:
+        # print "Writing objects to file."         
+        f.write(str(obj)+'\n')
+    # print "objects are ready to be read."
+    f.close()
+
+def main(searchFor):
+    print """
+    scrape main called
+    .
+    ..
+    ...
+    """
     objects = []
     for each in dates:
         url = base_url + each
@@ -119,14 +134,10 @@ def main(searchFor, lock):
                 flag = True
                 break
         if flag: objects.append(obj)
+    FileWrite(objects)
 
-    # print len(objects)," writable objects"
-    thread1 = threading.Thread(target = fileThread.FileHandle, args = ('w',lock,objects))
-    thread1.start()
     # print "now returning to timeThread"
     return
 
-# searchFor = ["mexico","uruguay"]
-# games = main(searchFor)
-# for game in games:
-#     print game
+# searchFor = ["mexico","uruguay","russia","poland","czech"]
+# main(searchFor)
